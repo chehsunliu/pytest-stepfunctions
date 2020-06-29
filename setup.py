@@ -11,6 +11,8 @@ setup(
     long_description=Path("./README.md").read_text(),
     long_description_content_type="text/markdown",
     url="https://github.com/chehsunliu/pytest-stepfunctions",
+    setup_requires=["setuptools_scm"],
+    use_scm_version={"write_to": "src/pytest_stepfunctions/_version.py"},
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=['pytest'],
