@@ -13,7 +13,7 @@ setup(
     license="MIT",
     url="https://github.com/chehsunliu/pytest-stepfunctions",
     setup_requires=["setuptools_scm"],
-    use_scm_version={"write_to": "src/pytest_stepfunctions/version.py"},
+    use_scm_version=True,
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=["pytest"],

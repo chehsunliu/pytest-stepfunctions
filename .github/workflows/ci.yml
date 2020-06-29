@@ -29,3 +29,4 @@ jobs:
       - name: Test the build functionality
         run: |
           make build
+      - uses: codecov/codecov-action@v1
