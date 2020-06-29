@@ -1,0 +1,10 @@
+name: Greetings
+on: [push]
+
+jobs:
+  test:
+    name: First Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: This is the first tep
+        run: echo 1234
