@@ -13,6 +13,7 @@ setup(
     url="https://github.com/chehsunliu/pytest-stepfunctions",
     packages=find_packages("src"),
     package_dir={"": "src"},
+    install_requires=['pytest'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
