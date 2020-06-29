@@ -4,7 +4,6 @@ from setuptools import setup, find_packages
 
 setup(
     name="pytest-stepfunctions",
-    version="0.0.1",
     author="Che-Hsun Liu",
     author_email="chehsunliu@gmail.com",
     description="A small description",
@@ -18,9 +17,15 @@ setup(
     package_dir={"": "src"},
     install_requires=["pytest"],
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "License :: OSI Approved :: MIT License",
+        "Intended Audience :: Developers",
+        "Development Status :: 1 - Planning",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Software Development :: Quality Assurance",
+        "Topic :: Software Development :: Testing",
     ],
     python_requires=">=3.6",
 )
