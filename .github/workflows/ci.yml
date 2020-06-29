@@ -1,11 +1,5 @@
 name: CI
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: [push]
 
 jobs:
   test:
@@ -23,13 +17,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel .
+          pip install pip-tools
+          pip-sync ./dev-requirements.txt ./requirements.txt
+          pip install --no-deps .
       - name: Run the tests
         run: |
-          pytest ./tests
-      - name: Test if build successfully
+          make test
+      - name: Run the linters
         run: |
-          python setup.py sdist bdist_wheel
-      - name: Show the dist folder
+          make linter
+      - name: Test the build functionality
         run: |
-          ls ./dist
+          make build
+      - uses: codecov/codecov-action@v1
