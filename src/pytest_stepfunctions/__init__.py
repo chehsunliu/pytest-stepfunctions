@@ -1,8 +1,9 @@
 try:
-    from ._version import version
+    from .version import version
+
     __version__ = version
 except ImportError:
-    __version__ = "unknown"
+    __version__ = version = "unknown"
 
 
 def add(a: int, b: int) -> int:
