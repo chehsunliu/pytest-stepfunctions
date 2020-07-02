@@ -51,7 +51,7 @@ def lambda_client(aws_lambda_endpoint: str) -> boto3.client:
 
 
 @pytest.mark.parametrize("my_case", my_cases, ids=[my_case.description for my_case in my_cases])
-def test_invoke(lambda_client: boto3.client, my_case: MyCase) -> None:
+def test_invoke_by_lambda_client(lambda_client: boto3.client, my_case: MyCase) -> None:
     response = lambda_client.invoke(FunctionName=my_case.function_name, Payload=json.dumps(my_case.payload).encode())
 
     assert 200 == response["StatusCode"]
