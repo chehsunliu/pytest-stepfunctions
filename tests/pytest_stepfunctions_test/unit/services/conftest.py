@@ -1,6 +1,6 @@
 import threading
 from http.server import HTTPServer
-from typing import Iterator
+from typing import Iterator, Tuple
 
 import pytest
 
@@ -13,7 +13,7 @@ def start_http_server(http_server: HTTPServer) -> None:
 
 
 @pytest.fixture(scope="session")
-def aws_lambda_endpoint() -> Iterator[str]:
+def aws_lambda_endpoint() -> Iterator[Tuple[str, str, int]]:
     address: str = "0.0.0.0"
     port: int = get_free_port()
 
@@ -21,7 +21,7 @@ def aws_lambda_endpoint() -> Iterator[str]:
     t = threading.Thread(target=start_http_server, args=(http_server,))
     t.start()
 
-    yield f"http://{address}:{port}"
+    yield f"http://{address}:{port}", address, port
 
     http_server.shutdown()
     t.join()

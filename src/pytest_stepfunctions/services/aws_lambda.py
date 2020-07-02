@@ -3,7 +3,7 @@ import json
 import re
 import sys
 import traceback
-from typing import Match
+from typing import Match, Optional
 from urllib.parse import urlparse, ParseResult
 from http.server import BaseHTTPRequestHandler
 
@@ -13,7 +13,7 @@ class AWSLambdaRequestHandler(BaseHTTPRequestHandler):
         try:
             parsed_path: ParseResult = urlparse(self.path)
 
-            match: Match = re.match(
+            match: Optional[Match[str]] = re.match(
                 "/2015-03-31/functions/(?P<function_name>[a-zA-Z0-9_.]+)/invocations", parsed_path.path
             )
             if match:
@@ -28,7 +28,10 @@ class AWSLambdaRequestHandler(BaseHTTPRequestHandler):
                 "errorType": e_type.__name__ if e_type else "",
                 "stackTrace": traceback.format_tb(e_traceback),
             }
-            self.wfile.write(b"HTTP/1.1 200 OK\nX-Amz-Function-Error: Unhandled\n" + json.dumps(output).encode())
+            self.wfile.write(
+                b"HTTP/1.1 200 OK\nX-Amz-Function-Error: Unhandled\n\n"
+                + json.dumps(output, separators=(",", ":")).encode()
+            )
 
     def _retrieve_payload(self) -> bytes:
         if "Content-Length" in self.headers:
