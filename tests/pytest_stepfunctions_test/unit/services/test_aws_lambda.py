@@ -54,7 +54,7 @@ def lambda_client(aws_lambda_endpoint: Tuple[str, str, int]) -> boto3.client:
 
 
 @pytest.mark.parametrize("my_case", my_cases, ids=[my_case.description for my_case in my_cases])
-def test_invoke_by_lambda_client(lambda_client: boto3.client, my_case: MyCase) -> None:
+def test_invoke_success_by_lambda_client(lambda_client: boto3.client, my_case: MyCase) -> None:
     response = lambda_client.invoke(FunctionName=my_case.function_name, Payload=json.dumps(my_case.payload).encode())
 
     assert 200 == response["StatusCode"]
@@ -62,7 +62,7 @@ def test_invoke_by_lambda_client(lambda_client: boto3.client, my_case: MyCase) -
 
 
 @pytest.mark.parametrize("my_case", my_cases, ids=[my_case.description for my_case in my_cases])
-def test_invoke_by_stepfunctions(aws_lambda_endpoint: Tuple[str, str, int], my_case: MyCase) -> None:
+def test_invoke_success_by_stepfunctions(aws_lambda_endpoint: Tuple[str, str, int], my_case: MyCase) -> None:
     """
     AWS StepFunctions Local uses `Transfer-Encoding: chunked` instead of a fixed `Content-Length`
     to transfer the payload.
@@ -93,3 +93,23 @@ def test_invoke_by_stepfunctions(aws_lambda_endpoint: Tuple[str, str, int], my_c
     assert my_case.expected_payload == json.load(response)
 
     conn.close()
+
+
+def fail(event: Dict[str, Any], *_args: Any, **_kwargs: Any) -> None:
+    assert event is not None
+    raise Exception("qq qq qq")
+
+
+def test_invoke_failure_by_lambda_client(lambda_client: boto3.client) -> None:
+    function_name: str = fail.__module__ + "." + fail.__name__
+    response = lambda_client.invoke(FunctionName=function_name, Payload=json.dumps({}).encode())
+    payload = json.load(response["Payload"])
+
+    assert 200 == response["StatusCode"]
+    assert "qq qq qq" == payload["errorMessage"]
+    assert "Exception" == payload["errorType"]
+
+
+def test_unsupported_function(lambda_client: boto3.client) -> None:
+    response = lambda_client.create_alias(FunctionName="a", Name="current", FunctionVersion="10")
+    assert 200 == response["ResponseMetadata"]["HTTPStatusCode"]
