@@ -16,11 +16,13 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=["pytest"],
+    entry_points={"pytest11": ["pytest-stepfunctions = pytest_stepfunctions.plugin"]},
     classifiers=[
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
         "Intended Audience :: Developers",
         "Development Status :: 1 - Planning",
+        "Framework :: Pytest",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
