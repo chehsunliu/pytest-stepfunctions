@@ -1,7 +1,8 @@
-import json
 import http.client
+import json
 from io import BytesIO
-from typing import NamedTuple, Any, Dict, Optional, Tuple
+from typing import NamedTuple, Any, Dict, Optional
+from urllib.parse import urlparse, ParseResult
 
 import boto3
 import pytest
@@ -42,14 +43,13 @@ my_cases = [
 
 
 @pytest.fixture
-def lambda_client(aws_lambda_endpoint: Tuple[str, str, int]) -> boto3.client:
-    url, _, _ = aws_lambda_endpoint
+def lambda_client(aws_lambda_endpoint_url: str) -> boto3.client:
     return boto3.client(
         "lambda",
         region_name="us-east-1",
         aws_access_key_id="AKIAIOSFODNN7EXAMPLE",
         aws_secret_access_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-        endpoint_url=url,
+        endpoint_url=aws_lambda_endpoint_url,
     )
 
 
@@ -62,15 +62,16 @@ def test_invoke_success_by_lambda_client(lambda_client: boto3.client, my_case: M
 
 
 @pytest.mark.parametrize("my_case", my_cases, ids=[my_case.description for my_case in my_cases])
-def test_invoke_success_by_stepfunctions(aws_lambda_endpoint: Tuple[str, str, int], my_case: MyCase) -> None:
+def test_invoke_success_by_stepfunctions(aws_lambda_endpoint_url: str, my_case: MyCase) -> None:
     """
     AWS StepFunctions Local uses `Transfer-Encoding: chunked` instead of a fixed `Content-Length`
     to transfer the payload.
     """
 
-    _, host, port = aws_lambda_endpoint
+    parsed_result: ParseResult = urlparse(aws_lambda_endpoint_url)
+    assert parsed_result.hostname is not None
 
-    conn = http.client.HTTPConnection(host, port=port)
+    conn = http.client.HTTPConnection(parsed_result.hostname, port=parsed_result.port)
     conn.connect()
     conn.putrequest("POST", f"/2015-03-31/functions/{my_case.function_name}/invocations")
     conn.putheader("Content-Type", "application/json")
