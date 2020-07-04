@@ -1,0 +1,10 @@
+version: "3.2"
+
+services:
+  tester:
+    build:
+      context: .
+      args:
+        PYTHON_IMAGE_TAG: "${PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG:-3.7}"
+      dockerfile: ./Dockerfile
+    command: pytest -c ./pytest.ini ./tests/pytest_stepfunctions_test 
