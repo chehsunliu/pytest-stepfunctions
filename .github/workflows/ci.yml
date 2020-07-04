@@ -17,13 +17,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run the tests
+        env:
+          PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG: ${{ matrix.python-version }}
         run: |
-          export PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG=${{ matrix.python-version }}
           make test
-      - name: Run the linters
+      - name: Run the lint
+          env:
+            PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG: ${{ matrix.python-version }}
         run: |
-          export PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG=${{ matrix.python-version }}
-          make linter
+          make lint
       - uses: codecov/codecov-action@v1
         with:
           name: codecov-${{ matrix.python-version }}
