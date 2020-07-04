@@ -1,0 +1,26 @@
+.git
+
+# JetBrains
+
+.idea
+
+# Python
+
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+
+htmlcov/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+.pytest_cache/
+
+venv/
+.venv
+
+.mypy_cache/
