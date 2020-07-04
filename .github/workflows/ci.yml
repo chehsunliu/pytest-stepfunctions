@@ -38,3 +38,7 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           name: codecov-${{ matrix.python-version }}
+      - name: Test Docker
+        run: |
+          docker version
+          docker-compose version
