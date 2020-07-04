@@ -28,14 +28,23 @@ class StepFunctionsRunner:
 
 
 def test_simple_state_machine(aws_stepfunctions_endpoint_url: str) -> None:
-    definition = {
-        "StartAt": "Hello",
-        "States": {"Hello": {"Type": "Pass", "Result": {"text": "abc"}, "ResultPath": "$.append", "End": True}},
+    definition: str = """
+    {
+      "StartAt": "Hello",
+      "States": {
+        "Hello": {
+          "Type": "Pass",
+          "Result": {
+            "text": "abc"
+          },
+          "ResultPath": "$.append",
+          "End": true
+        }
+      }
     }
+    """
 
-    response = StepFunctionsRunner(aws_stepfunctions_endpoint_url).run(
-        definition=json.dumps(definition, separators=(",", ":")), input_string="{}"
-    )
+    response = StepFunctionsRunner(aws_stepfunctions_endpoint_url).run(definition=definition, input_string='{"n":123}')
 
     assert "SUCCEEDED" == response["status"]
-    assert {"append": {"text": "abc"}} == json.loads(response["output"])
+    assert {"append": {"text": "abc"}, "n": 123} == json.loads(response["output"])
