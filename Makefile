@@ -1,41 +1,37 @@
 LINTER_SRC := ./setup.py ./src ./tests
 
 .PHONY: all
-all: build test linter
+all: test lint
 
-.PHONY: linter
-linter: black flake8 mypy
-
-.PHONY: build
-build:
-	@echo "> Build the package"
-	@python ./setup.py sdist bdist_wheel
+.PHONY: _base
+_base:
+	@docker-compose up --build --no-start
 
 .PHONY: test
-test:
+test: _base
 	@echo "> Run the tests"
-	@pytest --cov-report=xml --cov-report=term --cov-report=html --cov=pytest_stepfunctions ./tests
+	@docker-compose up --build --exit-code-from tester
+	@echo "> Copy coverage related files from the testing container"
+	@docker cp `docker-compose ps -q tester`:/app/coverage.xml .
+	@docker cp `docker-compose ps -q tester`:/app/htmlcov .
+
+.PHONY: lint
+lint: black flake8 mypy
 
 .PHONY: black
-black:
+black: _base
 	@echo "> Check black"
-	@black -l 120 --check $(LINTER_SRC)
+	@docker-compose run --no-deps --rm tester \
+	    black -l 120 --check $(LINTER_SRC)
 
 .PHONY: flake8
-flake8:
+flake8: _base
 	@echo "> Check flake8"
-	@flake8 $(LINTER_SRC)
+	@docker-compose run --no-deps --rm tester \
+	    flake8 $(LINTER_SRC)
 
 .PHONY: mypy
-mypy:
+mypy: _base
 	@echo "> Check mypy"
-	@mypy $(LINTER_SRC)
-
-.PHONY: clean
-clean:
-	@echo "> Clean artifacts and caches"
-	@rm -rf \
-	    ./.mypy_cache \
-	    ./.pytest_cache \
-	    ./build ./dist \
-	    ./htmlcov ./.coverage ./coverage.xml
+	@docker-compose run --no-deps --rm tester \
+	    mypy $(LINTER_SRC)
