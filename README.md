@@ -80,7 +80,53 @@ def test_bar(aws_stepfunctions_endpoint_url):
     sfn_client = boto3.client("stepfunctions", endpoint_url=aws_stepfunctions_endpoint_url)
     state_machine_arn = sfn_client.create_state_machine(
         name="list-ids", definition=definition, roleArn="arn:aws:iam::012345678901:role/DummyRole"
-    )
+    )["stateMachineArn"]
 ```
 
 Note the internal fake Lambda service in pytest-stepfunctions will parse Lambda ARNs to recognize what to call.
+
+### Mocking the EMR Client in the Lambda Code
+
+Here uses the [pytest-mock](https://github.com/pytest-dev/pytest-mock/) fixture to temporarily patch the `boto3` module inside the Lambda code. `botocore.stub.Stubber` is also applied to make sure the mock request parameters and response content are all valid:
+
+```python
+from botocore.stub import Stubber
+
+
+def test_bar(aws_stepfunctions_endpoint_url, mocker):
+    ...
+
+    emr_client = boto3.client("emr")
+    mocker.patch("my.pkg.emr.boto3").client.return_value = emr_client
+
+    stubber = Stubber(emr_client)
+    stubber.add_response("list_clusters", service_response={"Clusters": [{"id": "j-00001"}, {"id": "j-00002"}]})
+```
+
+### Starting Execution and Validating Results
+
+Start and wait until the execution status is not `RUNNING`:
+
+```python
+import json
+import time
+
+
+def test_bar(aws_stepfunctions_endpoint_url, mocker):
+    ...
+
+    execution_arn = sfn_client.start_execution(
+        stateMachineArn=state_machine_arn, name="list-ids-exec", input="{}"
+    )["executionArn"]
+
+    with stubber:
+        while True:
+            response = sfn_client.describe_execution(executionArn=execution_arn)
+            if response["status"] != "RUNNING":
+                break
+            time.sleep(0.5)
+
+    stubber.assert_no_pending_responses()
+    assert "SUCCEEDED" == response["status"]
+    assert ["j-00001", "j-00002"] == json.loads(response["output"])["cluster_ids"]
+```
