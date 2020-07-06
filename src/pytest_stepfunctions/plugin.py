@@ -33,7 +33,7 @@ def pytest_addoption(parser: Any) -> None:
         dest="pytest_stepfunctions_lambda_port",
         type=int,
         default=_DEFAULT_LAMBDA_PORT,
-        help=f"The port of the internal simulate Lambda service (default: {_DEFAULT_LAMBDA_PORT}",
+        help=f"The port of the internal simulate Lambda service (default: {_DEFAULT_LAMBDA_PORT})",
     )
 
 
