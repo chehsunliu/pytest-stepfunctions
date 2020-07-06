@@ -15,11 +15,12 @@ A pytest fixture that makes you able to mock Lambda code during AWS StepFunction
   * [Creating a State Machine](#creating-a-state-machine)
   * [Mocking the EMR Client in the Lambda Code](#mocking-the-emr-client-in-the-lambda-code)
   * [Starting Execution and Validating Results](#starting-execution-and-validating-results)
-  * [Running the test with the Step Functions JAR](#running-the-test-with-the-step-functions-jar)
+  * [Running the Test with the Step Functions JAR](#running-the-test-with-the-step-functions-jar)
+  * [Running the Test with the Step Functions Docker Image](#running-the-test-with-the-step-functions-docker-image)
 
 ## Overview
 
-AWS provides local Step Functions as a JAR and a Docker image for the quick testing without deployment. They described how to perform such task in [this article](https://docs.aws.amazon.com/step-functions/latest/dg/sfn-local-lambda.html) as well. I got excited at the very beginning, but soon ended up frustrated for still being unable to mock Lambda functions' external dependencies. Then I thought: what if initiate a Python thread with a fake Lambda service and use this fake service to execute Lambda functions? Fortunately, It works. 
+AWS provides local Step Functions as a JAR and a Docker image for the quick testing without deployment. They described how to perform such task in [this article](https://docs.aws.amazon.com/step-functions/latest/dg/sfn-local-lambda.html) as well. I got excited at the very beginning, but soon ended up frustrated for still being unable to mock Lambda functions' external dependencies. Then I thought: what if initiate a Python thread with a fake Lambda service and use this fake service to execute Lambda functions? Fortunately, It works!
 
 ## Installing
 
@@ -143,18 +144,20 @@ def test_bar(aws_stepfunctions_endpoint_url, mocker):
     assert ["j-00001", "j-00002"] == json.loads(response["output"])["cluster_ids"]
 ```
 
-### Running the test with the Step Functions JAR
+### Running the Test with the Step Functions JAR
 
 The JAR is available [here](https://docs.aws.amazon.com/step-functions/latest/dg/sfn-local.html). Download and execute it first:
 
 ```bash
 $ java -jar /path/to/StepFunctionsLocal.jar \
     --lambda-endpoint http://localhost:13000 \
+    --step-functions-endpoint http://localhost:8083 \
     --wait-time-scale 0
 Step Functions Local
 Version: 1.4.0
 Build: 2019-09-18
 2020-07-06 18:40:28.284: Configure [Lambda Endpoint] to [http://localhost:13000]
+2020-07-06 18:40:28.285: Configure [Step Functions Endpoint] to [http://localhost:8083]
 2020-07-06 18:40:28.323: Loaded credentials from profile: default
 2020-07-06 18:40:28.324: Starting server on port 8083 with account 123456789012, region us-east-1
 ```
@@ -177,4 +180,58 @@ collected 1 item
 tests/test_foo.py::test_bar PASSED                                           [100%]
 
 ================================ 1 passed in 1.01s =================================
+```
+
+### Running the Test with the Step Functions Docker Image
+
+I personally recommend this way as it is much easier to reproduce the testing environment.
+
+This is the `Dockerfile`
+
+```dockerfile
+FROM python:3.7
+
+WORKDIR /app
+
+COPY ./my ./my
+COPY ./tests ./tests
+RUN pip install pytest pytest-stepfunctions pytest-mock boto3
+```
+ 
+and the `docker-compose.yml` for Docker Compose:
+
+```yaml
+version: "3.2"
+
+services:
+  tester:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: xxx
+      AWS_SECRET_ACCESS_KEY: xxx
+    command: >
+      bash -c "pytest -v
+      --pytest-stepfunctions-endpoint-url=http://sfn-endpoint:8083
+      --pytest-stepfunctions-lambda-address=0.0.0.0
+      --pytest-stepfunctions-lambda-port=13000
+      ./tests"
+
+  sfn-endpoint:
+    image: amazon/aws-stepfunctions-local:1.5.1
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: xxx
+      AWS_SECRET_ACCESS_KEY: xxx
+      WAIT_TIME_SCALE: 0
+      STEP_FUNCTIONS_ENDPOINT: http://sfn-endpoint:8083
+      LAMBDA_ENDPOINT: http://tester:13000
+```
+
+Then run the following command to run the test:
+
+```bash
+$ docker-compose up --build --exit-code-from tester
 ```
