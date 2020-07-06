@@ -7,6 +7,15 @@
 
 A pytest fixture that makes you able to mock Lambda code during AWS StepFunctions local testing.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Installing](#installing)
+- [Getting Started](#getting-started)
+  * [Creating a State Machine](#creating-a-state-machine)
+  * [Mocking the EMR Client in the Lambda Code](#mocking-the-emr-client-in-the-lambda-code)
+  * [Starting Execution and Validating Results](#starting-execution-and-validating-results)
+
 ## Overview
 
 AWS provides local Step Functions as a JAR and a Docker image for the quick testing without deployment. They described how to perform such task in [this article](https://docs.aws.amazon.com/step-functions/latest/dg/sfn-local-lambda.html) as well. I got excited at the very beginning, but soon ended up frustrated for still being unable to mock Lambda functions' external dependencies. Then I thought: what if initiate a Python thread with a fake Lambda service and use this fake service to execute Lambda functions? Fortunately, It works. 
