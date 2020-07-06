@@ -17,6 +17,7 @@ A pytest fixture that makes you able to mock Lambda code during AWS StepFunction
   * [Starting Execution and Validating Results](#starting-execution-and-validating-results)
   * [Running the Test with the Step Functions JAR](#running-the-test-with-the-step-functions-jar)
   * [Running the Test with the Step Functions Docker Image](#running-the-test-with-the-step-functions-docker-image)
+- [Known Issues](#known-issues)
 
 ## Overview
 
