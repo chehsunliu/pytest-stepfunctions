@@ -15,6 +15,7 @@ A pytest fixture that makes you able to mock Lambda code during AWS StepFunction
   * [Creating a State Machine](#creating-a-state-machine)
   * [Mocking the EMR Client in the Lambda Code](#mocking-the-emr-client-in-the-lambda-code)
   * [Starting Execution and Validating Results](#starting-execution-and-validating-results)
+  * [Running the test with the Step Functions JAR](#running-the-test-with-the-step-functions-jar)
 
 ## Overview
 
@@ -140,4 +141,40 @@ def test_bar(aws_stepfunctions_endpoint_url, mocker):
     stubber.assert_no_pending_responses()
     assert "SUCCEEDED" == response["status"]
     assert ["j-00001", "j-00002"] == json.loads(response["output"])["cluster_ids"]
+```
+
+### Running the test with the Step Functions JAR
+
+The JAR is available [here](https://docs.aws.amazon.com/step-functions/latest/dg/sfn-local.html). Download and execute it first:
+
+```bash
+$ java -jar /path/to/StepFunctionsLocal.jar \
+    --lambda-endpoint http://localhost:13000 \
+    --wait-time-scale 0
+Step Functions Local
+Version: 1.4.0
+Build: 2019-09-18
+2020-07-06 18:40:28.284: Configure [Lambda Endpoint] to [http://localhost:13000]
+2020-07-06 18:40:28.323: Loaded credentials from profile: default
+2020-07-06 18:40:28.324: Starting server on port 8083 with account 123456789012, region us-east-1
+```
+
+Then run the test with the following command:
+
+```bash
+$ python -m pytest -v \
+    --pytest-stepfunctions-endpoint-url=http://0.0.0.0:8083 \
+    --pytest-stepfunctions-lambda-address=0.0.0.0 \
+    --pytest-stepfunctions-lambda-port=13000 \
+    ./tests
+=============================== test session starts ================================
+platform linux -- Python 3.7.3, pytest-5.4.3, py-1.9.0, pluggy-0.13.1 -- /tmp/gg/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /tmp/gg
+plugins: mock-3.1.1, stepfunctions-0.1a2
+collected 1 item
+
+tests/test_foo.py::test_bar PASSED                                           [100%]
+
+================================ 1 passed in 1.01s =================================
 ```
