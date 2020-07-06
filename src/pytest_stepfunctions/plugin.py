@@ -43,6 +43,8 @@ def start_http_server(http_server: HTTPServer) -> None:
 
 @pytest.fixture(scope="session")
 def aws_lambda_endpoint_url(request: Any) -> Iterator[str]:
+    """A pytest fixture to provide access to the simulate AWS Lambda service."""
+
     lambda_address: str = request.config.getoption("pytest_stepfunctions_lambda_address")
     lambda_port: int = request.config.getoption("pytest_stepfunctions_lambda_port")
 
@@ -58,6 +60,8 @@ def aws_lambda_endpoint_url(request: Any) -> Iterator[str]:
 
 @pytest.fixture(scope="session")
 def aws_stepfunctions_endpoint_url(request: Any, aws_lambda_endpoint_url: str) -> Iterator[str]:
+    """A pytest fixture to provide access to the local StepFunctions service."""
+
     assert aws_lambda_endpoint_url is not None
 
     stepfunctions_endpoint_url: str = request.config.getoption("pytest_stepfunctions_endpoint_url")
