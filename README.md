@@ -240,4 +240,4 @@ $ docker-compose up --build --exit-code-from tester
 ## Known Issues
 
 1. Nested workflows are very slow: if a state machine contains lots of nested state machines, the execution will be extremely slow even `WAIT_TIME_SCALE` is set to 0. This is a known performance issue in the official JAR.
-2. AWS Service integrations other than Lambda are not supported yet. Services like EMR even have no endpoint option in the official JAR. A possible workaround for some cases is calling them by Lambda functions.   
+2. AWS Service integrations other than Lambda are not supported yet. Services like EMR even have no endpoint option in the official JAR. A possible workaround for some cases is calling them by invoking Lambda functions.   
