@@ -213,7 +213,7 @@ services:
       AWS_ACCESS_KEY_ID: xxx
       AWS_SECRET_ACCESS_KEY: xxx
     command: >
-      bash -c "pytest -v
+      bash -c "python -m pytest -v
       --pytest-stepfunctions-endpoint-url=http://sfn-endpoint:8083
       --pytest-stepfunctions-lambda-address=0.0.0.0
       --pytest-stepfunctions-lambda-port=13000
