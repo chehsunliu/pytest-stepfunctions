@@ -97,10 +97,10 @@ def test_bar(aws_stepfunctions_endpoint_url, mocker):
     ...
 
     emr_client = boto3.client("emr")
-    mocker.patch("my.pkg.emr.boto3").client.return_value = emr_client
+    mocker.patch("my.pkg.emr.boto3", autospec=True).client.return_value = emr_client
 
     stubber = Stubber(emr_client)
-    stubber.add_response("list_clusters", service_response={"Clusters": [{"id": "j-00001"}, {"id": "j-00002"}]})
+    stubber.add_response("list_clusters", service_response={"Clusters": [{"Id": "j-00001"}, {"Id": "j-00002"}]})
 ```
 
 ### Starting Execution and Validating Results
