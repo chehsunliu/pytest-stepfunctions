@@ -21,7 +21,7 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
         "Intended Audience :: Developers",
-        "Development Status :: 1 - Planning",
+        "Development Status :: 4 - Beta",
         "Framework :: Pytest",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
