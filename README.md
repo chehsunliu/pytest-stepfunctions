@@ -17,6 +17,7 @@ A pytest fixture that makes you able to mock Lambda code during AWS StepFunction
   * [Starting Execution and Validating Results](#starting-execution-and-validating-results)
   * [Running the Test with the Step Functions JAR](#running-the-test-with-the-step-functions-jar)
   * [Running the Test with the Step Functions Docker Image](#running-the-test-with-the-step-functions-docker-image)
+- [Contributing](#contributing)
 - [Known Issues](#known-issues)
 
 ## Overview
@@ -235,6 +236,28 @@ Then run the following command to run the test:
 
 ```bash
 $ docker-compose up --build --exit-code-from tester
+```
+
+## Contributing
+
+Here are the tools required:
+
+- Docker and Docker Compose
+- GNU Make
+- [pip-tools](https://github.com/jazzband/pip-tools)
+
+Set up a virtual environment for your IDE:
+
+```bash
+$ python -m venv venv
+$ source ./venv/bin/activate
+(venv) $ pip-sync ./dev-requirements.txt ./requirements.txt
+```
+
+Run the tests and linters:
+
+```bash
+$ make lint test
 ```
 
 ## Known Issues
