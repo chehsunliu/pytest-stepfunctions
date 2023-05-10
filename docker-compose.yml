@@ -18,7 +18,7 @@ services:
       ./tests/pytest_stepfunctions_test"
 
   sfn-endpoint:
-    image: amazon/aws-stepfunctions-local:1.7.1
+    image: amazon/aws-stepfunctions-local:latest
     environment:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: xxx
