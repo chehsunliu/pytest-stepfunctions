@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        PYTHON_IMAGE_TAG: "${PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG:-3.7}"
+        PYTHON_IMAGE_TAG: "${PYTEST_STEPFUNCTIONS_PYTHON_IMAGE_TAG:-3.9}"
       dockerfile: ./Dockerfile
     environment:
       AWS_DEFAULT_REGION: us-east-1

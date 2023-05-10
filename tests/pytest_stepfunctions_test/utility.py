@@ -13,7 +13,9 @@ class StepFunctionsRunner:
         sfn_client = boto3.client("stepfunctions", endpoint_url=self.endpoint_url)
 
         state_machine_arn = sfn_client.create_state_machine(
-            name=str(uuid4()), definition=definition, roleArn="arn:aws:iam::012345678901:role/DummyRole",
+            name=str(uuid4()),
+            definition=definition,
+            roleArn="arn:aws:iam::012345678901:role/DummyRole",
         )["stateMachineArn"]
         execution_arn: str = sfn_client.start_execution(
             stateMachineArn=state_machine_arn, name=str(uuid4()), input=input_string
