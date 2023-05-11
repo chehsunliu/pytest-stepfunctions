@@ -3,9 +3,20 @@ import json
 import re
 import sys
 import traceback
-from typing import Match, Optional
-from urllib.parse import urlparse, ParseResult
+from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler
+from typing import Match, Optional
+from urllib.parse import ParseResult, urlparse
+
+
+@dataclass
+class LambdaContext:
+    function_name: str = "test-function"
+    memory_limit_in_mb: int = 128
+    invoked_function_arn: str = (
+        f"arn:aws:lambda:us-east-1:123456789012:function{function_name}"
+    )
+    aws_request_id: str = "da658bd3-2d6f-4e7b-8ec2-937234644fdc"
 
 
 class AWSLambdaRequestHandler(BaseHTTPRequestHandler):
@@ -14,7 +25,8 @@ class AWSLambdaRequestHandler(BaseHTTPRequestHandler):
             parsed_path: ParseResult = urlparse(self.path)
 
             match: Optional[Match[str]] = re.match(
-                "/2015-03-31/functions/(?P<function_name>[a-zA-Z0-9_.]+)/invocations", parsed_path.path
+                "/2015-03-31/functions/(?P<function_name>[a-zA-Z0-9_.]+)/invocations",
+                parsed_path.path,
             )
             if match:
                 return self._handle_invoke(function_name=match.group("function_name"))
@@ -37,7 +49,6 @@ class AWSLambdaRequestHandler(BaseHTTPRequestHandler):
         if "Content-Length" in self.headers:
             content_length: int = int(self.headers["Content-Length"])
             return self.rfile.read(content_length) if content_length > 0 else b"{}"
-
         assert self.headers["Transfer-Encoding"] == "chunked"
 
         content: bytes = b""
@@ -51,8 +62,10 @@ class AWSLambdaRequestHandler(BaseHTTPRequestHandler):
     def _handle_invoke(self, function_name: str) -> None:
         module_name, method_name = function_name.rsplit(".", maxsplit=1)
 
+        context = LambdaContext(function_name)
+
         event = json.loads(self._retrieve_payload().decode())
         module = importlib.import_module(module_name)
-        output = getattr(module, method_name)(event)
+        output = getattr(module, method_name)(event, context)
 
         self.wfile.write(b"HTTP/1.1 200 OK\n\n" + json.dumps(output).encode())
